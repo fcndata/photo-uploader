@@ -1,21 +1,17 @@
 # Python cache files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv/
-
-# Environment & sensitive files
+# Config files with credentials
 .env
 credentials/google_credentials.json
-credentials/gmail_secret.json
+credentials/token.json
+
+# Logs
+logs/*.txt
 
 # VSCode settings (optional)
-.vscode/
+.vscode/settings.json
