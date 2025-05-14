@@ -5,14 +5,30 @@ from pathlib import Path
 
 class UploadPipeline:
     def __init__(self, base_path: Path, google_client: GooglePhotosClient):
+        """
+        Initialize the UploadPipeline with a base path and Google Photos client.
+        Args:
+            base_path (Path): The base path where images are stored in local .
+            google_client (GooglePhotosClient): Instance of GooglePhotosClient for uploading images.
+        
+        """
         self.image_handler = ImageHandler(base_path)
         self.google_client = google_client
 
     def run(self, limit: int = None):
+        """
+        Run the upload pipeline.
+
+        Args:
+            limit (int): The maximum number of images to upload (test). If None, process all files.
+        """
+
         logger.info("Starting the upload pipeline.")
         metadata_dict = self.image_handler.scan_folder()
 
+        failed_uploads = []
         count = 0
+
         for img_name, metadata in metadata_dict.items():
             if limit and count >= limit:
                 logger.info(f"Reached test limit of {limit} files. Stopping.")
@@ -25,14 +41,27 @@ class UploadPipeline:
 
             self.image_handler.set_exif_timestamp(metadata)
 
-            upload_token = self.google_client.upload_image(metadata.img_url)
-            if not upload_token:
-                logger.error(f"Skipping {metadata.filename} due to upload failure.")
-                continue
+            try:
+                upload_token = self.google_client.upload_image(metadata.img_url)
+                if not upload_token:
+                    raise Exception("Upload token is None")
 
-            description = f"File date: {metadata.timestamp}" if metadata.timestamp else "No timestamp available"
-            self.google_client.create_media_item(upload_token, description)
+                description = f"File date: {metadata.timestamp}" if metadata.timestamp else "No timestamp available"
+                self.google_client.create_media_item(upload_token, description)
 
-            count += 1
+                count += 1
+
+            except Exception as e:
+                logger.error(f"Error uploading {metadata.filename}: {e}")
+                failed_uploads.append((metadata.filename, str(e)))
+
+        # Save failed uploads as a CSV file 
+        if failed_uploads:
+            error_log_path = Path("logs/failed_uploads.csv")
+            with error_log_path.open("w", encoding="utf-8") as f:
+                f.write("filename,error_message\n")
+                for filename, error in failed_uploads:
+                    f.write(f"{filename},{error}\n")
+            logger.warning(f"{len(failed_uploads)} uploads failed. Details saved in {error_log_path}")
 
         logger.info("Upload pipeline completed.")

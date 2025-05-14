@@ -8,9 +8,20 @@ from logs.logger import logger
 
 class ImageHandler:
     def __init__(self, base_path: Path):
+        """
+        Initialize the ImageHandler with a base path.
+        
+        Args:
+            base_path (Path): The base path where images are stored in local.
+        """
         self.base_path = base_path
-
     def scan_folder(self) -> Dict[str, ImageMetadata]:
+        """
+        Scan recursively the folder for images and create a metadata dictionary.
+        
+        Returns:
+            Dict[str, ImageMetadata]: A dictionary with filenames as keys and ImageMetadata objects as values.
+        """
         image_metadata_dict = {}
         for folder in self.base_path.iterdir():
             if folder.is_dir():
@@ -19,6 +30,13 @@ class ImageHandler:
         return image_metadata_dict
 
     def _create_image_metadata_dict(self, folder: Path) -> Dict[str, ImageMetadata]:
+        """
+        Recursively create a dictionary with the metadada of each image.
+        Returns:
+            Dict[str, ImageMetadata]: A dictionary with filenames as keys and ImageMetadata objects as values.
+        """        
+        logger.info(f"Scanning folder: {folder}")
+
         image_metadata_dict = {}
         for file in folder.iterdir():
             if file.is_dir():
@@ -43,6 +61,12 @@ class ImageHandler:
         return image_metadata_dict
 
     def convert_png_to_jpg(self, metadata: ImageMetadata) -> ImageMetadata:
+        """
+        Transform .png files into .jpg to modify the metadata with Exif.
+
+        Returns:
+            Dict[str, ImageMetadata]: A dictionary with filenames as keys and ImageMetadata objects as values.        
+        """
         logger.info(f"Converting {metadata.filename} to JPG.")
         im = Image.open(metadata.img_url)
         rgb_im = im.convert('RGB')
@@ -58,6 +82,13 @@ class ImageHandler:
         return updated_metadata
 
     def set_exif_timestamp(self, metadata: ImageMetadata):
+        """
+        Update the EXIF timestamp of the image with the parsed time from the filename.
+        
+        Args:
+            metadata (ImageMetadata): The metadata object containing the image information.
+
+        """
         if not metadata.timestamp:
             logger.warning(f"No timestamp found for {metadata.filename}. Skipping EXIF writing.")
             return
