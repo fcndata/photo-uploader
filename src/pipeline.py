@@ -2,9 +2,11 @@ from logs.logger import logger
 from src.image_handler import ImageHandler
 from src.google_photos_client import GooglePhotosClient
 from pathlib import Path
+from src.utils import load_config, save_failed_uploads
+
 
 class UploadPipeline:
-    def __init__(self, base_path: Path, google_client: GooglePhotosClient):
+    def __init__(self, base_path: Path, google_client: GooglePhotosClient, log_path: Path = Path("./logs/failed_uploads.csv")):
         """
         Initialize the UploadPipeline with a base path and Google Photos client.
         Args:
@@ -14,8 +16,9 @@ class UploadPipeline:
         """
         self.image_handler = ImageHandler(base_path)
         self.google_client = google_client
+        self.log_path = log_path
 
-    def run(self, limit: int = None):
+    def run(self):
         """
         Run the upload pipeline.
 
@@ -27,12 +30,8 @@ class UploadPipeline:
         metadata_dict = self.image_handler.scan_folder()
 
         failed_uploads = []
-        count = 0
 
         for img_name, metadata in metadata_dict.items():
-            if limit and count >= limit:
-                logger.info(f"Reached test limit of {limit} files. Stopping.")
-                break
 
             logger.info(f"Preparing image: {metadata.filename}")
 
@@ -49,19 +48,12 @@ class UploadPipeline:
                 description = f"File date: {metadata.timestamp}" if metadata.timestamp else "No timestamp available"
                 self.google_client.create_media_item(upload_token, description)
 
-                count += 1
-
             except Exception as e:
                 logger.error(f"Error uploading {metadata.filename}: {e}")
                 failed_uploads.append((metadata.filename, str(e)))
 
-        # Save failed uploads as a CSV file 
+        # Save failed uploads 
         if failed_uploads:
-            error_log_path = Path("logs/failed_uploads.csv")
-            with error_log_path.open("w", encoding="utf-8") as f:
-                f.write("filename,error_message\n")
-                for filename, error in failed_uploads:
-                    f.write(f"{filename},{error}\n")
-            logger.warning(f"{len(failed_uploads)} uploads failed. Details saved in {error_log_path}")
+            save_failed_uploads(failed_uploads, self.log_path)
 
         logger.info("Upload pipeline completed.")
