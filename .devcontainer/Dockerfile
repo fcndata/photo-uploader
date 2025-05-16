@@ -1,19 +1,23 @@
-# Dockerfile para el contenedor de desarrollo de Python
+# Docker Python Image to load
 FROM python:3.11
 
-# Instalar dependencias del sistema necesarias para el proyecto
+# Install OS-level dependencies (Linux) needed for the project
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear el directorio de trabajo dentro del contenedor
+# Set working directory
 WORKDIR /app
 
-# Copiar e instalar dependencias de Python
+# Install Python dependencies into the image
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del código del proyecto
+# Copy project files
 COPY . .
 
+# Start a bash shell for development
 CMD ["bash"]
+
+# Expose the port for the web server
+EXPOSE 8000

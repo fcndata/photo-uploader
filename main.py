@@ -1,38 +1,41 @@
-from dotenv import load_dotenv
 from pathlib import Path
 from logs.logger import logger
 from src.google_photos_client import GooglePhotosClient
 from src.pipeline import UploadPipeline
-import os
-
+from src.utils import load_config
 
 
 def main():
-    # Load env variables
-    load_dotenv(override=True)
+    config = load_config()
 
-    FOLDER_PATH = Path(os.environ['FOLDER_PATH']).resolve()
-    GOOGLE_CLIENT_SECRET_JSON = Path(os.environ['GOOGLE_CLIENT_SECRET_JSON']).resolve()
-    TOKEN_JSON_PATH = Path(os.environ.get('TOKEN_JSON_PATH', './credentials/token.json')).resolve()
+    # Access values from the config
+    FOLDER_PATH = Path(config["mount"].get("FOLDER_PATH")).resolve()
+    GOOGLE_CLIENT_SECRET_JSON = Path(config["creds"].get("GOOGLE_CLIENT_SECRET_JSON")).resolve()
+    TOKEN_JSON_PATH = Path(config["creds"].get("TOKEN_JSON_PATH", "./credentials/token.json")).resolve()
+    HEADLESS = config["execute"].get("headless", True)
+    DRY_RUN = config["execute"].get("dry_run", False)
+    LOG_FILE = Path(config["mount"].get("log_file", "logs/failed_uploads.csv")).resolve()
+
 
     # Choose headless=True for servers or pipelines without browser, False for local testing
     google_client = GooglePhotosClient(
-        credentials_json_path=GOOGLE_CLIENT_SECRET_JSON,
-        token_json_path=TOKEN_JSON_PATH,
-        scopes=['https://www.googleapis.com/auth/photoslibrary.appendonly'],
-        headless=True,
-        dry_run=True  # Set to False to execute real uploads
+        credentials_json_path = GOOGLE_CLIENT_SECRET_JSON,
+        token_json_path = TOKEN_JSON_PATH,
+        scopes = ['https://www.googleapis.com/auth/photoslibrary.appendonly'],
+        headless = HEADLESS,
+        dry_run = DRY_RUN  
     )
 
     pipeline = UploadPipeline(
-        base_path=FOLDER_PATH,
-        google_client=google_client
+        base_path = FOLDER_PATH,
+        google_client = google_client,
+        log_path = LOG_FILE
+        
     )
 
-    # Run in test mode with a limit of 3 files
     logger.info("Pipeline started")
 
-    pipeline.run(limit=2)
+    pipeline.run()
 
 if __name__ == "__main__":
     main()

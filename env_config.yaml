@@ -1,0 +1,10 @@
+mount:
+  FOLDER_PATH: C:/Users/Facundo Toneguzzo/OneDrive/Escritorio/Dropbox
+  target: /mnt/photos
+  log_file: logs/failed_uploads.csv
+creds:
+  GOOGLE_CLIENT_SECRET_JSON: ./credentials/google_credentials.json
+  TOKEN_JSON_PATH: ./credentials/token.json
+execute:
+  headless: true # if true, it will not open a browser
+  dry_run: false # if true, it will not upload anything 
