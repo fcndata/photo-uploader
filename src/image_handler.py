@@ -15,6 +15,7 @@ class ImageHandler:
             base_path (Path): The base path where images are stored in local.
         """
         self.base_path = base_path
+        
     def scan_folder(self) -> Dict[str, ImageMetadata]:
         """
         Scan recursively the folder for images and create a metadata dictionary.

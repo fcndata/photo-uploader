@@ -8,34 +8,34 @@ from src.utils import load_config
 def main():
     config = load_config()
 
-    # Access values from the config
-    FOLDER_PATH = Path(config["mount"].get("FOLDER_PATH")).resolve()
-    GOOGLE_CLIENT_SECRET_JSON = Path(config["creds"].get("GOOGLE_CLIENT_SECRET_JSON")).resolve()
-    TOKEN_JSON_PATH = Path(config["creds"].get("TOKEN_JSON_PATH", "./credentials/token.json")).resolve()
-    HEADLESS = config["execute"].get("headless", True)
-    DRY_RUN = config["execute"].get("dry_run", False)
-    LOG_FILE = Path(config["mount"].get("log_file", "logs/failed_uploads.csv")).resolve()
+    # Load paths and runtime parameters from the YAML config
+    container_photos_path = Path(config["mount"]["container_mount_path"]).resolve()
+    google_client_secret_file = Path(config["creds"]["google_client_secret_file"]).resolve()
+    token_file = Path(config["creds"].get("token_file", "./credentials/token.json")).resolve()
+    output_log_file = Path(config["mount"].get("output_log_file", "logs/failed_uploads.csv")).resolve()
 
+    headless = config["execute"].get("headless", True)
+    dry_run = config["execute"].get("dry_run", False)
 
-    # Choose headless=True for servers or pipelines without browser, False for local testing
+    # Initialize Google Photos client
     google_client = GooglePhotosClient(
-        credentials_json_path = GOOGLE_CLIENT_SECRET_JSON,
-        token_json_path = TOKEN_JSON_PATH,
-        scopes = ['https://www.googleapis.com/auth/photoslibrary.appendonly'],
-        headless = HEADLESS,
-        dry_run = DRY_RUN  
+        credentials_json_path=google_client_secret_file,
+        token_json_path=token_file,
+        scopes=['https://www.googleapis.com/auth/photoslibrary.appendonly'],
+        headless=headless,
+        dry_run=dry_run
     )
 
+    # Initialize and run the upload pipeline
     pipeline = UploadPipeline(
-        base_path = FOLDER_PATH,
-        google_client = google_client,
-        log_path = LOG_FILE
-        
+        base_path=container_photos_path,
+        google_client=google_client,
+        log_path=output_log_file
     )
 
     logger.info("Pipeline started")
-
     pipeline.run()
+
 
 if __name__ == "__main__":
     main()

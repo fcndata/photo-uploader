@@ -1,10 +1,13 @@
 mount:
-  FOLDER_PATH: C:/Users/Facundo Toneguzzo/OneDrive/Escritorio/Dropbox
-  target: /mnt/photos
-  log_file: logs/failed_uploads.csv
+  host_path: C:/Users/Facundo Toneguzzo/OneDrive/Escritorio/Dropbox
+  container_mount_path: /mnt/photos
+  output_log_file: logs/failed_uploads.csv
+
 creds:
-  GOOGLE_CLIENT_SECRET_JSON: ./credentials/google_credentials.json
-  TOKEN_JSON_PATH: ./credentials/token.json
+  google_client_secret_file: ./credentials/google_credentials.json
+  token_file: ./credentials/token.json
+
 execute:
-  headless: true # if true, it will not open a browser
-  dry_run: false # if true, it will not upload anything 
+  headless: true
+  dry_run: true
+  scope: https://www.googleapis.com/auth/photoslibrary.appendonly

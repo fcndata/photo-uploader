@@ -1,13 +1,15 @@
 {
     "name": "Photo Uploader Dev",
     "context": ".",
-    "dockerFile": "Dockerfile",
+    "dockerFile": ".devcontainer/Dockerfile",
     "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"
     },
     "extensions": [
         "ms-python.python"
     ],
-    "postCreateCommand": "pip install -r requirements.txt",
+    "mounts": [
+        "source=C:/Users/Facundo Toneguzzo/OneDrive/Escritorio/Dropbox,target=/mnt/photos,type=bind"
+    ],
     "remoteUser": "root"
 }
