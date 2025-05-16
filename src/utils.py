@@ -60,7 +60,12 @@ def generate_devcontainer(output_dir=".devcontainer"):
     output_path.mkdir(parents=True, exist_ok=True)
 
     devcontainer_file = output_path / "devcontainer.json"
+
+    if devcontainer_file.exists():
+        devcontainer_file.unlink()
+        logger.info("Previous devcontainer.json found and deleted.")
+
     with devcontainer_file.open("w", encoding="utf-8") as f:
         json.dump(devcontainer, f, indent=4)
 
-    logger.info(f"DevContainer file generated at {devcontainer_file.resolve()}")
+    logger.info(f"✅ DevContainer file generated at {devcontainer_file.resolve()}")
