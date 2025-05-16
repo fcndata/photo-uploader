@@ -68,8 +68,4 @@ def generate_devcontainer(output_dir=".devcontainer"):
     with devcontainer_file.open("w", encoding="utf-8") as f:
         json.dump(devcontainer, f, indent=4)
 
-<<<<<<< HEAD
-    logger.info(f"✅ DevContainer file generated at {devcontainer_file.resolve()}")
-=======
     logger.info(f" DevContainer file generated at {devcontainer_file.resolve()}")
->>>>>>> d602e3e (Clean, clear and well-documented pipeline)
