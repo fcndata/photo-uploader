@@ -36,12 +36,12 @@ def save_failed_uploads(failed_uploads: List[Tuple[str, str]], output_path: Path
 def generate_devcontainer(output_dir=".devcontainer"):
 
     config = load_config()    
-    source_path = config["mount"]["FOLDER_PATH"]
-    target_path = config["mount"]["target"]
+    source_path = config["mount"]["host_path"]
+    target_path = config["mount"]["container_mount_path"]
 
     devcontainer = {
         "name": "Photo Uploader Dev",
-        "context": ".",
+        "context": "..",
         "dockerFile": "Dockerfile",
         "settings": {
             "terminal.integrated.defaultProfile.linux": "bash"
@@ -49,9 +49,8 @@ def generate_devcontainer(output_dir=".devcontainer"):
         "extensions": [
             "ms-python.python"
         ],
-        "postCreateCommand": "pip install -r requirements.txt",
         "mounts": [
-            f"source={source_path},target={target_path},type=bind"
+            f"source={source_path},target={target_path},type=readonly" 
         ],
         "remoteUser": "root"
     }
@@ -68,8 +67,4 @@ def generate_devcontainer(output_dir=".devcontainer"):
     with devcontainer_file.open("w", encoding="utf-8") as f:
         json.dump(devcontainer, f, indent=4)
 
-<<<<<<< HEAD
-    logger.info(f"✅ DevContainer file generated at {devcontainer_file.resolve()}")
-=======
     logger.info(f" DevContainer file generated at {devcontainer_file.resolve()}")
->>>>>>> d602e3e (Clean, clear and well-documented pipeline)

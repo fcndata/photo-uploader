@@ -9,6 +9,7 @@ __pycache__/
 .env
 credentials/google_credentials.json
 credentials/token.json
+.devcontainer/devcontainer.json
 
 # Logs
 logs/*.txt

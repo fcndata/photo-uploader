@@ -11,10 +11,10 @@ WORKDIR /app
 
 # Install Python dependencies into the image
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Copy project files
-COPY . .
+COPY .. .
 
 # Start a bash shell for development
 CMD ["bash"]
